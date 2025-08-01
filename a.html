@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ToneGrab – YouTube MP3 & MP4 Dönüştürücü</title>
+  <link rel="stylesheet" href="style.css" type="text/css">
+
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --accent: #1f6feb;
+      --text: #c9d1d9;
+      --radius: 12px;
+      --font: "Inter", system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: var(--accent);
+    }
+
+    main {
+      background: var(--card);
+      padding: 2.5rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .input-wrapper input[type="url"] {
+      width: 100%;
+      padding: 1.2rem 2.5rem 1.2rem 1rem;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1.1rem;
+      background: #21262d;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 0;
+    }
+
+    .refresh-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: auto !important;
+      padding: 8px !important;
+      background: transparent !important;
+      border: none;
+      cursor: pointer;
+      color: var(--accent);
+      opacity: 0.7;
+      transition: all 0.2s;
+    }
+
+    .refresh-btn:hover {
+      opacity: 1;
+      transform: translateY(-50%) rotate(180deg);
+
+    }
+
+    .format-buttons {
+      display: none;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+
+    }
+
+    .format-buttons.show {
+      display: flex;
+    }
+
+    .format-btn {
+      flex: 1;
+      padding: 1rem;
+      border: 2px solid var(--accent);
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--accent);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .format-btn:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .format-btn.selected {
+      background: var(--accent);
+      color: white;
+    }
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+
+    button:hover {
+      opacity: .9;
+    }
+
+    #loader {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #result {
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    #videoInfo {
+      margin-bottom: 1.5rem;
+    }
+
+    #videoThumb {
+      width: 200px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+    }
+
+    #videoTitle {
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    #downloadBtn {
+      display: inline-block;
+      padding: 1rem 2rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .spinner {
+      border: 3px solid #30363d;
+      border-top: 3px solid var(--accent);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: .5rem;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    footer {
+      margin-top: 2rem;
+      font-size: .8rem;
+      color: #8b949e;
+    }
+
+    .error {
+      color: #f85149;
+      text-align: center;
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background: rgba(248, 81, 73, 0.1);
+      border-radius: var(--radius);
+    }
+
+    .success {
+      color: #7c3aed;
+      text-align: center;
+      margin-top: 1rem;
+      padding: 0.5rem;
+      background: rgba(124, 58, 237, 0.1);
+      border-radius: var(--radius);
+    }
+
+    #progressContainer {
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .progress-circle {
+      position: relative;
+      display: inline-block;
+      width: 120px;
+      height: 120px;
+    }
+
+    .progress-circle-inner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 2;
+    }
+
+    .progress-text {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #progressPercent {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    #progressStatus {
+      font-size: 0.8rem;
+      color: var(--text);
+      margin-top: 0.25rem;
+      opacity: 0.8;
+    }
+
+    .progress-ring {
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle-bg {
+      fill: none;
+      stroke: #30363d;
+      stroke-width: 8;
+    }
+
+    .progress-ring-circle {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 339.292;
+      stroke-dashoffset: 339.292;
+      transition: stroke-dashoffset 0.3s ease;
+    }
+
+    @keyframes progressPulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .progress-circle.animate {
+      animation: progressPulse 2s ease-in-out infinite;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🎧 ToneGrab</h1>
+    <p>YouTube linkini yapıştır, birkaç saniyede MP3 veya MP4 olarak indir.</p>
+  </header>
+
+  <main>
+    <form id="converter">
+      <div class="input-wrapper">
+        <input type="url" id="url" placeholder="YouTube URL'sini buraya yapıştırın..." required>
+        <button type="button" id="refreshBtn" class="refresh-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2.5 12c0-4.97 4.03-9 9-9M12.5 21c4.97 0 9-4.03 9-9" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="format-buttons" id="formatButtons">
+        <button type="button" class="format-btn" data-format="mp3">🎵 MP3</button>
+        <button type="button" class="format-btn" data-format="mp4">🎬 MP4</button>
+      </div>
+
+      <button type="submit" id="convertBtn">Dönüştür ve İndir</button>
+    </form>
+
+    <div id="result" class="hidden">
+      <div id="videoInfo">
+        <img id="videoThumb" src="" alt="Kapak" />
+        <div id="videoTitle"></div>
+      </div>
+      <a id="downloadBtn" href="#" download>📥 İndir</a>
+    </div>
+
+    <div id="progressContainer" class="hidden">
+      <div class="progress-circle">
+        <div class="progress-circle-inner">
+          <div class="progress-text">
+            <span id="progressPercent">0%</span>
+            <div id="progressStatus">Hazırlanıyor...</div>
+          </div>
+        </div>
+        <svg class="progress-ring" width="120" height="120">
+          <circle class="progress-ring-circle-bg" cx="60" cy="60" r="54"></circle>
+          <circle class="progress-ring-circle" cx="60" cy="60" r="54"></circle>
+        </svg>
+      </div>
+    </div>
+
+    <div id="error" class="hidden error"><b>Hata:</b><br></div>
+    <div id="success" class="hidden success"></div>
+  </main>
+
+  <footer>
+    <small>© 2024 ToneGrab – Ücretsizdir, kayıt gerekmez, tamamen güvenli.</small>
+  </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
