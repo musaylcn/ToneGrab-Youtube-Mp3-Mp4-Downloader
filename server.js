@@ -30,7 +30,7 @@ app.use(express.static(__dirname));
 
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'a.html'));
+  res.sendFile(path.join(__dirname, 'tonegrab.html'));
 });
 
 // Tek bir convert endpoint'i
@@ -93,7 +93,7 @@ app.post('/api/convert', async (req, res) => {
       io.to(socketId).emit('progress', { percent: 20, status: 'İşleniyor' });
     }
 
-   
+
     await new Promise((resolve, reject) => {
       let lastProgress = 20;
 
